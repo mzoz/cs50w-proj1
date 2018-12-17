@@ -16,13 +16,13 @@ def main():
     f = open('books.csv')
     reader = csv.reader(f)
     next(reader, None)  # skip the header
-    for isbn, title, author, year in reader:
+    for isbn, title, author, pub in reader:
         if not isbn:
             continue
-        book = Book(isbn=isbn, title=title, author=author, year=year)
+        book = Book(isbn=isbn, title=title, author=author, pub=pub)
         db.session.add(book)
         print("adding:", isbn)
-    db.session.commit() # extremely slow... I don't know why
+    db.session.commit()  # extremely slow... I don't know why
 
 
 if __name__ == '__main__':
