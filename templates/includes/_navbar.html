@@ -1,0 +1,62 @@
+<nav class="navbar navbar-expand-lg navbar-light" style="background-color: #f4f2e9">
+	<div class="container">
+		{#	  <a class="navbar-brand" href="{{ url_for('index') }}">#}
+		{#		  <img src="/static/images/logo.svg" width="36" height="36">#}
+		{#		  BookReviews</a>#}
+		{##}
+		{#	  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">#}
+		{#	    <span class="navbar-toggler-icon"></span>#}
+		{#	  </button>#}
+		{##}
+		{#	  <div class="collapse navbar-collapse" id="navbarNavAltMarkup">#}
+		{#	    <div class="navbar-nav">#}
+		{#	      <a class="nav-item nav-link active" href="#">Home <span class="sr-only">(current)</span></a>#}
+		{#	      <a class="nav-item nav-link" href="#">Features</a>#}
+		{#	      <a class="nav-item nav-link" href="#">Pricing</a>#}
+		{#	      <a class="nav-item nav-link disabled" href="#">Disabled</a>#}
+		{#		    <span class="navbar-text">haha</span>#}
+		{#	    </div>#}
+		{#	  </div>#}
+		<a class="navbar-brand" href="{{ url_for('index') }}">
+			<img src="/static/images/logo.svg" width="36" height="36">
+			BookReviews
+		</a>
+
+		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown"
+		        aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+
+		<div id="navbarNavDropdown" class="navbar-collapse collapse">
+			<ul class="navbar-nav mr-auto">
+{#				<li class="nav-item active">#}
+{#					<a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>#}
+{#				</li>#}
+{#				<li class="nav-item">#}
+{#					<a class="nav-link" href="#">Features</a>#}
+{#				</li>#}
+{#				<li class="nav-item">#}
+{#					<a class="nav-link" href="#">Pricing</a>#}
+{#				</li>#}
+			</ul>
+
+			<ul class="navbar-nav">
+				{% if session['logged_in'] %}
+					<li class="nav-item">
+						<a class="nav-link" href="{{ url_for('index') }}">Hi, {{ session['name'] }}!</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+					</li>
+				{% else %}
+					<li class="nav-item">
+						<a class="nav-link" href="{{ url_for('login') }}">Login</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="{{ url_for('register') }}">Register</a>
+					</li>
+				{% endif %}
+			</ul>
+		</div>
+	</div>
+</nav>
