@@ -4,6 +4,7 @@ from flask import Flask, session, render_template, request, redirect, url_for, f
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
+from requests import get
 
 app = Flask(__name__)
 
@@ -26,10 +27,97 @@ db = scoped_session(sessionmaker(bind=engine))
 @app.route("/", methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        isbn = request.form['isbn'] 
+        isbn = request.form['isbn'] or ''
+        title = request.form['title'] or ''
+        author = request.form['author'] or ''
+        books = db.execute(
+            'SELECT * FROM books WHERE UPPER(isbn) LIKE UPPER(:isbn) '
+            'AND UPPER(title) LIKE UPPER(:title) '
+            'AND UPPER(author) LIKE UPPER(:author)',
+            {'isbn': '%'+isbn+'%', 'title': '%'+title+'%', 'author': '%'+author+'%'}
+        ).fetchall()
+        return render_template('index.html', books=books)
+    return render_template('index.html', fresh_page=True)
 
 
-    return render_template('index.html')
+def good_reads(isbn):
+    payload = {'isbns': isbn, 'key': 'QZSdf0LA2UVqQ2hVodMrA'}
+    res = get('https://www.goodreads.com/book/review_counts.json', params=payload)
+    if res.status_code != 200:
+        return None
+    data = res.json()
+    return data['books'][0]
+
+
+@app.route("/<book_id>", methods=['GET', 'POST'])
+def book_page(book_id):
+    # fetch book info
+    book = db.execute('SELECT * FROM books WHERE id=:book_id', {'book_id': book_id}).fetchone()
+    reviews = db.execute('SELECT * FROM reviews WHERE book_id=:book_id', {'book_id': book_id}).fetchall()
+    book_info = good_reads(book['isbn'])
+    rating = book_info['average_rating'] if book_info else None
+    number = book_info['ratings_count'] if book_info else None
+    link = 'https://www.goodreads.com/book/isbn/' + book['isbn'] if book_info else None
+
+    # i. GET request
+    if request.method == 'GET':
+        return render_template('book.html',
+                               book=book,
+                               reviews=reviews,
+                               rating=rating,
+                               number = number,
+                               link=link)
+
+    # ii. POST request
+    # - not logged in
+    error = None
+    if 'name' not in session:
+        error = 'You must be logged in to review book.'
+        return render_template('book.html',
+                               book=book,
+                               reviews=reviews,
+                               rating=rating,
+                               number=number,
+                               link=link,
+                               error=error)
+    # - logged in
+    else:
+        user_rating = request.form['rating']
+        comment = request.form['comment']
+        if not comment:
+            error = "Comment section can't be empty."
+            return render_template('book.html',
+                                   book=book,
+                                   reviews=reviews,
+                                   rating=rating,
+                                   number=number,
+                                   link=link,
+                                   error=error)
+        # check previous review
+        for review in reviews:
+            if review['user_name'] == session['name']:
+                error = 'You can only leave one review per a book.'
+                return render_template('book.html',
+                                       book=book,
+                                       reviews=reviews,
+                                       rating=rating,
+                                       number=number,
+                                       link=link,
+                                       error=error)
+        db.execute(
+            'INSERT INTO reviews (book_id, user_name, rating, comment) VALUES'
+            '(:book_id, :user_name, :rating, :comment)',
+            {'book_id': book_id, 'user_name': session['name'], 'rating': user_rating, 'comment': comment}
+        )
+        db.commit()
+        # update reviews
+        reviews = db.execute('SELECT * FROM reviews WHERE book_id=:book_id', {'book_id': book_id}).fetchall()
+        return render_template('book.html',
+                               book=book,
+                               reviews=reviews,
+                               rating=rating,
+                               number=number,
+                               link=link)
 
 
 @app.route("/register", methods=['GET', 'POST'])

@@ -20,4 +20,7 @@
 		</div>
 	</form>
 
+	{% if not fresh_page %}
+		{% include 'includes/_books.html' %}
+	{% endif %}
 {% endblock %}

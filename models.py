@@ -29,6 +29,6 @@ class Review(db.Model):
     __tablename__ = 'reviews'
     id = db.Column(db.Integer, primary_key=True)
     book_id = db.Column(db.Integer, db.ForeignKey('books.id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     user_name = db.Column(db.String, db.ForeignKey('users.name'), nullable=False)
+    rating = db.Column(db.Integer, nullable=False)
     comment = db.Column(db.Text, nullable=False)
