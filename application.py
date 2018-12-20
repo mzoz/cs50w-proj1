@@ -185,3 +185,31 @@ def logout():
     flash('Logged out.')
     return redirect(url_for('index'))
 
+
+@app.route("/api/<isbn>")
+def book_api(isbn):
+    # verify isbn
+    book = db.execute('SELECT * FROM books WHERE isbn=:isbn', {'isbn': isbn}).fetchone()
+    if book is None:
+        return jsonify({"error": "Invalid ISBN"}), 404
+    # isbn verified
+    book_id = book['id']
+    reviews = db.execute('SELECT * FROM reviews WHERE book_id=:book_id', {'book_id': book_id}).fetchall()
+    # calculate average score
+    count = 0
+    score = 0
+    total = 0
+    if reviews is not None:
+        for review in reviews:
+            count += 1
+            total += int(review['rating'])
+        score = round(total/count, 2)
+
+    return jsonify({
+        "title": book['title'],
+        "author": book['author'],
+        "year": book['pub'],
+        "isbn": isbn,
+        "review_count": count,
+        "average_score": score
+    })
