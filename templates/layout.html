@@ -9,7 +9,14 @@
 
 	<body>
 		{% include 'includes/_navbar.html' %}
+
+
 		<div class="container" style="margin-top: 50px">
+			<div style="display: flex; justify-content: center">
+				<a href="{{ url_for('index') }}">
+					<img src="{{ url_for('static', filename='images/logo.svg') }}" alt="" style="height: 200px">
+				</a>
+			</div>
 
 			{% with messages = get_flashed_messages() %}
 			  {% if messages %}
