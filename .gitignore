@@ -1,3 +1,6 @@
+# idea files
+.idea/*
+
 # Flask files
 flask_session/
 
