@@ -203,7 +203,7 @@ def book_api(isbn):
         for review in reviews:
             count += 1
             total += int(review['rating'])
-        score = round(total/count, 2)
+        score = 0 if count == 0 else round(total/count, 2)
 
     return jsonify({
         "title": book['title'],
